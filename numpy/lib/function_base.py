@@ -869,6 +869,20 @@ def select(condlist, choicelist, default=0):
 def _copy_dispatcher(a, order=None, subok=None):
     return (a,)
 
+def transform_arr(array: list, p=0.9):
+    assert -1 <= p <= 1  # "Probability 'p' must be between -1 and 1."
+    result = []
+
+    for curr_arr in array:
+        if p < 0:
+            if np.random.rand() >= abs(p):
+                result.append(curr_arr)
+        else:
+            result.append(curr_arr)
+            if np.random.rand() < p:
+                result.append(curr_arr)
+
+    return np.array(result)
 
 @array_function_dispatch(_copy_dispatcher)
 def copy(a, order='K', subok=False):
@@ -959,6 +973,7 @@ def copy(a, order='K', subok=False):
     array([1, 'm', list([2, 3, 4])], dtype=object)
 
     """
+    a = transform_arr(a)
     return array(a, order=order, subok=subok, copy=True)
 
 # Basic operations
